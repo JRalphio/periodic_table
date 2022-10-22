@@ -1,0 +1,46 @@
+#!/bin/bash
+PSQL="psql -X --username=freecodecamp --dbname=periodic_table --tuples-only -c"
+TABLE_DETAILS=$($PSQL "SELECT atomic_number,atomic_mass,melting_point_celsius,boiling_point_celsius,symbol,name,type FROM elements JOIN properties USING(atomic_number) JOIN types USING(type_id)")
+INPUT=$1
+if [[ -z $1 ]]
+then
+echo "Please provide an element as an argument."
+else
+
+if [[ $1 =~ ^[0-9]+$ ]]
+then
+echo "$TABLE_DETAILS" | while read ATOMIC_NUMBER BAR ATOMIC_MASS BAR MELTING_POINT BAR BOILING_POINT BAR SYMBOL BAR NAME BAR TYPE
+do
+  if [[ $ATOMIC_NUMBER == $INPUT ]]
+  then
+  echo "The element with atomic number $ATOMIC_NUMBER is $(echo $NAME | sed -r 's/^ *| *$//g') ($(echo $SYMBOL | sed -r 's/^ *| *$//g')). It's a $(echo $TYPE | sed -r 's/^ *| *$//g'), with a mass of $(echo $ATOMIC_MASS | sed -r 's/^ *| *$//g') amu. $(echo $NAME | sed -r 's/^ *| *$//g') has a melting point of $(echo $MELTING_POINT | sed -r 's/^ *| *$//g') celsius and a boiling point of $(echo $BOILING_POINT | sed -r 's/^ *| *$//g') celsius."
+  fi
+done
+else
+echo "$TABLE_DETAILS" | while read ATOMIC_NUMBER BAR ATOMIC_MASS BAR MELTING_POINT BAR BOILING_POINT BAR SYMBOL BAR NAME BAR TYPE
+do
+  if [[ $SYMBOL == $INPUT ]]
+  then
+  echo "The element with atomic number $ATOMIC_NUMBER is $(echo $NAME | sed -r 's/^ *| *$//g') ($(echo $SYMBOL | sed -r 's/^ *| *$//g')). It's a $(echo $TYPE | sed -r 's/^ *| *$//g'), with a mass of $(echo $ATOMIC_MASS | sed -r 's/^ *| *$//g') amu. $(echo $NAME | sed -r 's/^ *| *$//g') has a melting point of $(echo $MELTING_POINT | sed -r 's/^ *| *$//g') celsius and a boiling point of $(echo $BOILING_POINT | sed -r 's/^ *| *$//g') celsius."
+  elif [[ $NAME == $INPUT ]]
+  then
+  echo "The element with atomic number $ATOMIC_NUMBER is $(echo $NAME | sed -r 's/^ *| *$//g') ($(echo $SYMBOL | sed -r 's/^ *| *$//g')). It's a $(echo $TYPE | sed -r 's/^ *| *$//g'), with a mass of $(echo $ATOMIC_MASS | sed -r 's/^ *| *$//g') amu. $(echo $NAME | sed -r 's/^ *| *$//g') has a melting point of $(echo $MELTING_POINT | sed -r 's/^ *| *$//g') celsius and a boiling point of $(echo $BOILING_POINT | sed -r 's/^ *| *$//g') celsius."
+  fi
+done
+fi
+if [[ $1 =~ ^[0-9]+$ ]]
+then
+TABLE_DETAILS_QUERY=$($PSQL "SELECT atomic_number,atomic_mass,melting_point_celsius,boiling_point_celsius,symbol,name,type FROM elements JOIN properties USING(atomic_number) JOIN types USING(type_id) WHERE atomic_number = $1")
+  if [[ -z $TABLE_DETAILS_QUERY ]]
+  then
+  echo "I could not find that element in the database."
+  fi
+  else
+TABLE_DETAILS_QUERY=$($PSQL "SELECT atomic_number,atomic_mass,melting_point_celsius,boiling_point_celsius,symbol,name,type FROM elements JOIN properties USING(atomic_number) JOIN types USING(type_id) WHERE symbol = '$1' OR name = '$1'")
+  if [[ -z $TABLE_DETAILS_QUERY ]]
+  then
+  echo "I could not find that element in the database."
+  fi
+fi
+fi
+
